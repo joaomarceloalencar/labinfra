@@ -1,0 +1,25 @@
+---
+- name: Criar usuário labinfra
+  hosts: ativos
+  become: yes
+  gather_facts: no
+
+  vars:
+    novo_usuario: labinfra
+    senha: '15lab66infra'
+    grupos: dialout,users,wireshark,vboxusers,labinfra
+
+  tasks:
+    - name: Criar grupo labinfra
+      shell: sudo groupadd labinfra 2>/dev/null || true
+      changed_when: false
+
+    - name: Criar usuário labinfra
+      shell: |
+        sudo useradd -m -g labinfra -G {{ grupos }} -s /bin/bash {{ novo_usuario }}
+      changed_when: true
+
+    - name: Definir senha do usuário labinfra
+      shell: echo "{{ novo_usuario }}:{{ senha }}" | sudo chpasswd
+      changed_when: true
+      no_log: true
