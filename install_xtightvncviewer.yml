@@ -1,0 +1,14 @@
+---
+- name: Instalar xtightvncviewer
+  hosts: ativos
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Atualizar cache de pacotes
+      shell: sudo apt-get update
+      changed_when: true
+
+    - name: Instalar xtightvncviewer
+      shell: sudo apt-get install -y xtightvncviewer
+      changed_when: true
