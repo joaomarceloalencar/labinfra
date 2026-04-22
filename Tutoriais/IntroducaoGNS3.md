@@ -436,29 +436,69 @@ ovs-vsctl show
 
 ### 🎯 Objetivo
 
-Aplicar todos os conceitos aprendidos para resolver um problema de rede.
+Aplicar todos os conceitos aprendidos para resolver um problema de rede que exige que dois hosts participem de **duas VLANs simultaneamente**.
 
 ---
 
 ### 🧩 Cenário
 
-> *"O gerente de TI informou que PC1 precisa se comunicar com PC3 para acessar um sistema do setor Financeiro. Atualmente, a comunicação está bloqueada pelas VLANs. Reconfigure a rede para que isso seja possível, **sem remover o isolamento entre os demais hosts**."*
+> *"O gerente de TI informou que PC1 (TI) precisa se comunicar com PC3 (Financeiro) para acessar um sistema compartilhado entre os setores. Porém, PC1 deve continuar se comunicando com PC2 (TI), e PC3 deve continuar se comunicando com PC4 (Financeiro). Os demais isolamentos devem ser mantidos."*
 
 ---
 
 ### 📋 Requisitos
 
-* PC1 deve conseguir se comunicar com PC3
-* PC2 **não** deve conseguir se comunicar com PC3 ou PC4
-* PC4 **não** deve conseguir se comunicar com PC1 ou PC2
+| Origem | Destino | Comunicação |
+|--------|---------|-------------|
+| PC1 | PC2 | ✅ Deve funcionar (ambos na VLAN 10) |
+| PC1 | PC3 | ✅ Deve funcionar (VLAN compartilhada) |
+| PC3 | PC4 | ✅ Deve funcionar (ambos na VLAN 20) |
+| PC2 | PC3 | ❌ Não deve funcionar |
+| PC2 | PC4 | ❌ Não deve funcionar |
+| PC1 | PC4 | ❌ Não deve funcionar |
+
+---
+
+### 📖 Conceitos necessários
+
+Para que um host participe de duas VLANs ao mesmo tempo, a sua porta no switch precisa ser configurada como **trunk** (em vez de access). Com isso, o host recebe quadros **com tags 802.1Q** e precisa criar **sub-interfaces VLAN** para separar o tráfego de cada VLAN.
+
+#### Sub-interfaces VLAN no Linux
+
+O Linux permite criar interfaces virtuais associadas a uma VLAN sobre uma interface física:
+
+```bash
+# Criar sub-interface para VLAN 10 sobre eth0
+ip link add link eth0 name eth0.10 type vlan id 10
+ip addr add <IP>/24 dev eth0.10
+ip link set eth0.10 up
+
+# Criar sub-interface para VLAN 20 sobre eth0
+ip link add link eth0 name eth0.20 type vlan id 20
+ip addr add <IP>/24 dev eth0.20
+ip link set eth0.20 up
+```
+
+> ⚠️ Quando um host usa sub-interfaces VLAN, a interface `eth0` **não deve ter IP configurado diretamente**. Cada IP fica em sua respectiva sub-interface.
+
+#### Porta trunk no Open vSwitch
+
+Para que as tags cheguem ao host, a porta do switch deve ser trunk:
+
+```bash
+ovs-vsctl set port ethX trunks=10,20
+```
 
 ---
 
 ### 💡 Dicas
 
-* Verifique as VLANs configuradas em cada porta
-* Pense em qual VLAN PC1 e PC3 precisam estar
-* Lembre-se de testar **todos os pares** após a reconfiguração
+* Apenas PC1 e PC3 precisam de portas trunk — PC2 e PC4 continuam em portas access
+* PC1 precisa de sub-interfaces para VLAN 10 (comunicação com PC2) e VLAN 20 (comunicação com PC3)
+* PC3 precisa de sub-interfaces para VLAN 20 (comunicação com PC4) e VLAN 10 (comunicação com PC1)
+* Os IPs devem ser coerentes: a sub-interface na VLAN 10 usa a sub-rede `10.0.0.0/24`, e na VLAN 20 usa `10.0.0.0/24` (mesma sub-rede, pois todos estão em `/24`)
+* Lembre-se de **remover o IP antigo** de `eth0` antes de configurar as sub-interfaces
+* Teste **todos os pares** da tabela de requisitos
 
 ---
 
@@ -471,12 +511,54 @@ ovs-vsctl show
 # Ver tabela MAC
 ovs-appctl fdb/show br0
 
-# Ver IPs dos hosts
-ip addr show eth0
-
-# Remover tag de uma porta (se necessário)
+# Mudar porta de access para trunk
 ovs-vsctl remove port eth1 tag 10
+ovs-vsctl set port eth1 trunks=10,20
+
+# Ver IPs e sub-interfaces dos hosts
+ip addr show
+ip link show
+
+# Criar sub-interface VLAN
+ip link add link eth0 name eth0.10 type vlan id 10
+
+# Remover IP de uma interface
+ip addr flush dev eth0
 ```
+
+---
+
+### 🧪 Validação
+
+Após a reconfiguração, execute os testes abaixo e anote os resultados:
+
+```bash
+# PC1 → PC2 (VLAN 10): deve funcionar
+ping -c 3 10.0.0.2
+
+# PC1 → PC3 (VLAN compartilhada): deve funcionar
+ping -c 3 10.0.0.3
+
+# PC3 → PC4 (VLAN 20): deve funcionar
+ping -c 3 10.0.0.4
+
+# PC2 → PC3: NÃO deve funcionar
+ping -c 3 10.0.0.3
+
+# PC2 → PC4: NÃO deve funcionar
+ping -c 3 10.0.0.4
+
+# PC1 → PC4: NÃO deve funcionar
+ping -c 3 10.0.0.4
+```
+
+---
+
+### 💬 Perguntas
+
+* Qual a diferença entre uma porta access e uma porta trunk do ponto de vista do host?
+* Por que PC1 e PC3 precisam de sub-interfaces, mas PC2 e PC4 não?
+* Quantas entradas na tabela MAC do switch você espera ver após os testes? Por quê?
 
 ---
 
@@ -502,7 +584,9 @@ Cada aluno deve entregar:
 | Tabela MAC         | Parte 2                   |
 | Troubleshooting L1 | Parte 3 — Cenário B       |
 | Troubleshooting L3 | Parte 3 — Cenários A e C  |
-| VLAN               | Parte 4                   |
+| VLAN (access)      | Parte 4                   |
+| VLAN (trunk)       | Parte 5                   |
+| Sub-interfaces     | Parte 5                   |
 | Validação de rede  | Partes 4 e 5              |
 
 ---
