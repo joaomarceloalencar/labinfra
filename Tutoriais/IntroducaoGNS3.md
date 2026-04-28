@@ -524,6 +524,36 @@ ip link add link eth0 name eth0.10 type vlan id 10
 
 # Remover IP de uma interface
 ip addr flush dev eth0
+
+# Comandos no PC1 
+ip link add link eth0 name eth0.10 type vlan id 10
+ip link add link eth0 name eth0.15 type vlan id 15
+ip addr add 10.0.0.1/24 dev eth0.10
+ip addr add 10.0.2.1/24 dev eth0.15
+ip link set eth0.10 up
+ip link set eth0.15 up
+
+# Comandos no PC2
+ip addr add 10.0.0.2/24 dev eth0
+ip link set eth0 up
+
+# Comandos no PC3
+ip link add link eth0 name eth0.20 type vlan id 20
+ip link add link eth0 name eth0.15 type vlan id 15
+ip addr add 10.0.1.3/24 dev eth0.20
+ip addr add 10.0.2.3/24 dev eth0.15
+ip link set eth0.20 up
+ip link set eth0.15 up
+
+# Comandos no PC4
+ip addr add 10.0.1.4/24 dev eth0
+ip link set eth0 up
+
+# Comandos no Switch
+ovs-vsctl set port eth2 tag=10
+ovs-vsctl set port eth4 tag=20
+ovs-vsctl set port eth1 trunks=10,15
+ovs-vsctl set port eth3 trunks=15,20
 ```
 
 ---
