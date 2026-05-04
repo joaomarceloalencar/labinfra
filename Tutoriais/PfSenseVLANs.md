@@ -25,6 +25,7 @@ Aproximadamente **3h**
 * Ter concluído o Laboratório 01 (Partes 1 a 4)
 * Templates disponíveis no GNS3:
   * Container: `ubuntu-net` (insightlab/ubuntu-net:1.0)
+  * Máquina virtual: `UbuntuDesktop` (QEMU — com interface gráfica e Firefox)
   * Switch: Open vSwitch (insightlab/ovs:1.1)
   * Roteador/Firewall: pfSense (pfsense-base.qcow2)
   * Cloud: NAT
@@ -71,7 +72,7 @@ Em redes reais, é comum um roteador/firewall servir múltiplas VLANs por uma ú
    |              |              |                 |
  tag=1000      tag=1000       tag=2000          tag=2000
    |              |              |                 |
- [Admin1]     [Admin2]      [Aluno1]           [Aluno2]
+ [Admin1]  [UbuntuDesktop]   [Aluno1]           [Aluno2]
 ```
 
 ### Tabela de endereçamento
@@ -81,8 +82,8 @@ Em redes reais, é comum um roteador/firewall servir múltiplas VLANs por uma ú
 | pfSense | — | WAN (e0) | DHCP (via NAT) | Acesso à Internet |
 | pfSense | 1000 | LAN VLAN 1000 | 10.0.0.1/24 | Gateway Admin |
 | pfSense | 2000 | LAN VLAN 2000 | 10.0.1.1/24 | Gateway Alunos |
-| Admin1 | 1000 | eth0 | 10.0.0.10/24 | Host administração |
-| Admin2 | 1000 | eth0 | 10.0.0.11/24 | Host administração |
+| Admin1 | 1000 | eth0 | 10.0.0.10/24 | Host administração (terminal) |
+| UbuntuDesktop | 1000 | eth0 | 10.0.0.11/24 | Host administração (interface gráfica / Firefox) |
 | Aluno1 | 2000 | eth0 | 10.0.1.10/24 | Host alunos |
 | Aluno2 | 2000 | eth0 | 10.0.1.11/24 | Host alunos |
 
@@ -94,13 +95,14 @@ Em redes reais, é comum um roteador/firewall servir múltiplas VLANs por uma ú
    * 1 **NAT** (cloud)
    * 1 **pfSense** (QEMU — pfsense-base)
    * 1 **Open vSwitch** (OVS)
-   * 4 containers **ubuntu-net** (renomeie para Admin1, Admin2, Aluno1, Aluno2)
+   * 3 containers **ubuntu-net** (renomeie para Admin1, Aluno1, Aluno2)
+   * 1 máquina virtual **UbuntuDesktop** (QEMU)
 
 2. Conecte:
    * **NAT** → **pfSense** interface `e0` (WAN)
    * **pfSense** interface `e1` (LAN) → **OVS** interface `eth1`
    * **Admin1** eth0 → **OVS** `eth2`
-   * **Admin2** eth0 → **OVS** `eth3`
+   * **UbuntuDesktop** eth0 → **OVS** `eth3`
    * **Aluno1** eth0 → **OVS** `eth4`
    * **Aluno2** eth0 → **OVS** `eth5`
 
@@ -173,175 +175,122 @@ Deve mostrar:
 
 ---
 
-## Parte 3 — Configurar o pfSense (interface web)
+## Parte 3 — Configurar o pfSense pelo console
 
 ### Objetivo
 
-Acessar o pfSense pela interface web, criar as VLANs e configurar os gateways de cada rede.
+Criar as VLANs e atribuir as interfaces do pfSense diretamente pelo console, usando a opção **Assign Interfaces**.
 
 ---
 
-### Passo 1 — Acesso inicial ao pfSense pelo console
+### Passo 1 — Atribuição de interfaces e criação de VLANs
 
-Ao iniciar o pfSense, ele apresenta um menu no console. Verifique:
+No console do pfSense, selecione a opção **1) Assign Interfaces**.
 
-* **WAN** deve ter recebido um IP via DHCP (do NAT do GNS3).
-* **LAN** pode estar com uma configuração padrão (geralmente 192.168.1.1).
+O pfSense perguntará se deseja configurar VLANs agora:
 
-No console do pfSense, anote o IP da WAN. Se a LAN não estiver acessível ainda, usaremos o console para a configuração inicial.
-
-> Se o pfSense perguntar sobre VLANs na primeira inicialização, responda **não** por enquanto. Faremos a configuração pela interface web.
-
----
-
-### Passo 2 — Ajustar a LAN temporariamente para acesso web
-
-Para acessar a interface web do pfSense, precisamos que um host consiga alcançá-lo. No console do pfSense:
-
-1. Selecione a opção **2) Set interface(s) IP address**
-2. Escolha a interface **LAN**
-3. Configure:
-   * IP: `10.0.0.1`
-   * Máscara: `24`
-   * Não habilitar DHCP ainda
-   * Protocolo HTTP para webConfigurator: **sim** (se perguntar)
-
----
-
-### Passo 3 — Configurar um host para acessar o pfSense
-
-No **Admin1**, configure IP e gateway temporariamente:
-
-```bash
-ip addr add 10.0.0.10/24 dev eth0
-ip link set eth0 up
-ip route add default via 10.0.0.1
+```
+Should VLANs be set up now [y|n]?
 ```
 
-> **Atenção:** neste momento, a porta do OVS onde Admin1 está conectado tem `tag=1000`, mas o pfSense ainda não tem VLAN configurada na LAN. A comunicação pode não funcionar. Se não funcionar, remova temporariamente o trunk e as tags para fazer a configuração inicial:
+Responda **y**.
 
-```bash
-# No OVS — temporário, apenas para configuração inicial
-ovs-vsctl remove port eth1 trunks 1000,2000
-ovs-vsctl set port eth2 tag=1
+#### Criar VLAN 1000 (Administração)
+
+```
+Enter the parent interface name for the new VLAN (or nothing if finished): em1
+Enter the VLAN tag (1 to 4094): 1000
+Enter the VLAN description (optional): Administracao
 ```
 
-Após a configuração inicial do pfSense, restauraremos as VLANs.
+#### Criar VLAN 2000 (Alunos)
 
-Teste o acesso:
+```
+Enter the parent interface name for the new VLAN (or nothing if finished): em1
+Enter the VLAN tag (1 to 4094): 2000
+Enter the VLAN description (optional): Alunos
+```
 
-```bash
-ping -c 3 10.0.0.1
+#### Finalizar
+
+```
+Enter the parent interface name for the new VLAN (or nothing if finished): [Enter]
 ```
 
 ---
 
-### Passo 4 — Acessar a interface web
+### Passo 2 — Atribuir as interfaces
 
-Se você tem o container **ubuntu-desktop** (com VNC) ou um **UbuntuDesktop** (QEMU), conecte-o ao OVS e acesse via navegador.
-
-Caso contrário, use `curl` a partir do Admin1 para verificar que o pfSense responde:
-
-```bash
-curl -k http://10.0.0.1
-```
-
-Para acessar a interface web completa, abra o navegador no **UbuntuDesktop** (se disponível na topologia) ou use a interface do próprio GNS3 e acesse:
+Após criar as VLANs, o pfSense solicitará a atribuição de cada interface:
 
 ```
-http://10.0.0.1
+Enter the WAN interface name or 'a' for auto-detection: em0
+Enter the LAN interface name or 'a' for auto-detection: em1.1000
+Enter the Optional 1 interface name or 'a' for auto-detection (or nothing if finished): em1.2000
+Enter the Optional 2 interface name or 'a' for auto-detection (or nothing if finished): [Enter]
 ```
 
-Credenciais padrão:
-* **Usuário:** admin
-* **Senha:** pfsense
+Confirme quando perguntado:
+
+```
+Do you want to proceed [y|n]? y
+```
+
+> Após a confirmação, `em1.1000` passa a ser a **LAN** (Administração) e `em1.2000` passa a ser **OPT1** (Alunos). A interface física `em1` não recebe IP diretamente — todo o tráfego passa pelas sub-interfaces VLAN.
 
 ---
 
-### Passo 5 — Criar VLANs no pfSense
+### Passo 3 — Configurar os IPs das interfaces
 
-Na interface web:
+Selecione a opção **2) Set interface(s) IP address**.
 
-1. Vá em **Interfaces > Assignments > VLANs**
-2. Clique em **+ Add**
-3. Crie a VLAN 1000:
-   * **Parent Interface:** `em1` (a interface LAN do pfSense)
-   * **VLAN Tag:** 1000
-   * **Description:** Administracao
-4. Clique em **Save**
-5. Crie a VLAN 2000:
-   * **Parent Interface:** `em1` (mesma interface LAN)
-   * **VLAN Tag:** 2000
-   * **Description:** Alunos
-6. Clique em **Save**
+#### LAN (VLAN 1000 — Administração)
 
----
+Escolha a interface **LAN** e configure:
 
-### Passo 6 — Atribuir as VLANs como interfaces
+```
+Enter the new LAN IPv4 address: 10.0.0.1
+Enter the new LAN IPv4 subnet bit count: 24
+For a WAN, enter the upstream gateway address.
+For all other interfaces, press <ENTER> for none: [Enter]
+```
 
-1. Vá em **Interfaces > Assignments**
-2. Na seção **Available network ports**, selecione a VLAN 1000 e clique em **+ Add**
-3. Repita para a VLAN 2000
-4. Agora aparecerão novas interfaces (OPT1 e OPT2)
+Quando perguntar sobre habilitar DHCP: responda **n** (configuraremos na Parte 6).
 
----
+Quando perguntar sobre HTTP para o webConfigurator: responda **y**.
 
-### Passo 7 — Configurar a interface da VLAN 1000 (Administração)
+#### OPT1 (VLAN 2000 — Alunos)
 
-1. Clique na nova interface (OPT1) para editá-la
-2. Configure:
-   * **Enable:** marcar
-   * **Description:** ADMIN
-   * **IPv4 Configuration Type:** Static IPv4
-   * **IPv4 Address:** `10.0.0.1` / `24`
-3. Clique em **Save** e depois **Apply Changes**
+Repita a opção **2** e escolha a interface **OPT1**:
+
+```
+Enter the new OPT1 IPv4 address: 10.0.1.1
+Enter the new OPT1 IPv4 subnet bit count: 24
+For a WAN, enter the upstream gateway address.
+For all other interfaces, press <ENTER> for none: [Enter]
+```
+
+Quando perguntar sobre DHCP: responda **n**.
 
 ---
 
-### Passo 8 — Configurar a interface da VLAN 2000 (Alunos)
+### Verificação
 
-1. Clique na interface OPT2
-2. Configure:
-   * **Enable:** marcar
-   * **Description:** ALUNOS
-   * **IPv4 Configuration Type:** Static IPv4
-   * **IPv4 Address:** `10.0.1.1` / `24`
-3. Clique em **Save** e depois **Apply Changes**
+O console do pfSense exibirá um resumo semelhante a:
 
----
-
-### Passo 9 — Desabilitar a interface LAN original
-
-Como agora usamos VLANs sobre a interface LAN física, a interface LAN "pura" (sem tag) não deve ter IP:
-
-1. Vá em **Interfaces > LAN**
-2. Mude **IPv4 Configuration Type** para **None**
-3. **Save** e **Apply Changes**
-
-> Isso é necessário porque todo o tráfego agora passa pelas sub-interfaces VLAN.
-
----
-
-### Passo 10 — Restaurar a configuração do OVS
-
-Se você removeu temporariamente as VLANs no Passo 3, agora restaure:
-
-```bash
-# No OVS
-ovs-vsctl set port eth1 trunks=1000,2000
-ovs-vsctl set port eth2 tag=1000
-ovs-vsctl set port eth3 tag=1000
-ovs-vsctl set port eth4 tag=2000
-ovs-vsctl set port eth5 tag=2000
+```
+WAN  (em0)      ->  IP via DHCP (NAT)
+LAN  (em1.1000) ->  10.0.0.1/24
+OPT1 (em1.2000) ->  10.0.1.1/24
 ```
 
 ---
 
 ### Perguntas
 
-* Por que o pfSense precisa de VLANs na interface LAN, sendo que os hosts enviam quadros sem tag?
-* Qual é o papel do switch OVS na tradução entre portas access e trunk?
-* O que aconteceria se esquecêssemos de configurar o trunk no OVS?
+* Por que a interface física `em1` não recebe IP diretamente nessa configuração?
+* Qual a vantagem de configurar VLANs pelo console em vez da interface web?
+* O que aconteceria se atribuíssemos `em1` (sem tag VLAN) como LAN?
 
 ---
 
@@ -361,12 +310,34 @@ ip link set eth0 up
 ip route add default via 10.0.0.1
 ```
 
-### Admin2
+### UbuntuDesktop
+
+O UbuntuDesktop usa NetworkManager. Configure o IP pelo terminal ou pela interface gráfica.
+
+**Pelo terminal:**
 
 ```bash
-ip addr add 10.0.0.11/24 dev eth0
-ip link set eth0 up
-ip route add default via 10.0.0.1
+nmcli con mod "Wired connection 1" ipv4.addresses 10.0.0.11/24 ipv4.gateway 10.0.0.1 ipv4.dns "8.8.8.8" ipv4.method manual
+nmcli con up "Wired connection 1"
+```
+
+**Pela interface gráfica:**
+
+1. Abra as **Configurações de Rede** (Network Settings)
+2. Clique no ícone de engrenagem da interface cabeada
+3. Na aba **IPv4**, selecione **Manual**
+4. Preencha:
+   * **Endereço:** `10.0.0.11`
+   * **Máscara:** `255.255.255.0`
+   * **Gateway:** `10.0.0.1`
+   * **DNS:** `8.8.8.8`
+5. Clique em **Aplicar** e reconecte a interface
+
+Verifique:
+
+```bash
+ip addr show eth0
+ip route
 ```
 
 ### Aluno1
@@ -390,7 +361,7 @@ ip route add default via 10.0.1.1
 ### Testes — Mesma VLAN
 
 ```bash
-# Admin1 → Admin2 (VLAN 1000): deve funcionar
+# Admin1 → UbuntuDesktop (VLAN 1000): deve funcionar
 ping -c 3 10.0.0.11
 
 # Aluno1 → Aluno2 (VLAN 2000): deve funcionar
@@ -440,6 +411,20 @@ ping -c 3 8.8.8.8
 ### Objetivo
 
 Configurar regras de firewall para permitir tráfego de saída (Internet) e definir a política de comunicação entre VLANs.
+
+---
+
+### Acessar a interface web do pfSense
+
+A partir daqui, as configurações são feitas pela interface web. No **UbuntuDesktop**, abra o **Firefox** e acesse:
+
+```
+http://10.0.0.1
+```
+
+Credenciais padrão:
+* **Usuário:** `admin`
+* **Senha:** `pfsense`
 
 ---
 
@@ -529,15 +514,15 @@ Configurar o pfSense para distribuir endereços IP automaticamente em cada VLAN,
 
 ### Passo 3 — Testar nos hosts
 
+#### Containers ubuntu-net (Admin1, Aluno1, Aluno2)
+
 O container `ubuntu-net` não possui cliente DHCP por padrão. Instale-o primeiro:
 
 ```bash
 apt update && apt install -y isc-dhcp-client
 ```
 
-> Esse comando precisa ser executado em **cada host** que for usar DHCP.
-
-Agora remova a configuração manual e solicite IP via DHCP:
+Remova a configuração manual e solicite IP via DHCP:
 
 ```bash
 # Limpar IP manual
@@ -555,6 +540,24 @@ ip addr show eth0
 ip route
 ```
 
+#### UbuntuDesktop
+
+O NetworkManager já gerencia DHCP automaticamente. Basta alterar o método de conexão de **Manual** para **Automático (DHCP)**:
+
+```bash
+nmcli con mod "Wired connection 1" ipv4.method auto ipv4.addresses "" ipv4.gateway "" ipv4.dns ""
+nmcli con up "Wired connection 1"
+```
+
+Ou pela interface gráfica: **Configurações de Rede → engrenagem → IPv4 → Automático (DHCP) → Aplicar**.
+
+Verifique o IP recebido:
+
+```bash
+ip addr show eth0
+ip route
+```
+
 ---
 
 ### Verificação
@@ -562,7 +565,7 @@ ip route
 | Host | VLAN | IP esperado | Gateway esperado |
 |------|------|-------------|------------------|
 | Admin1 | 1000 | 10.0.0.100-200 | 10.0.0.1 |
-| Admin2 | 1000 | 10.0.0.100-200 | 10.0.0.1 |
+| UbuntuDesktop | 1000 | 10.0.0.100-200 | 10.0.0.1 |
 | Aluno1 | 2000 | 10.0.1.100-200 | 10.0.1.1 |
 | Aluno2 | 2000 | 10.0.1.100-200 | 10.0.1.1 |
 
