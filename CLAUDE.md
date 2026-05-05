@@ -10,10 +10,10 @@ This repository has three distinct purposes:
 
 Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentation:
 
-- `IntroducaoGNS3.md` — Introduction to GNS3
-- `PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
-- `TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
-- `RoteamentoLinux.md` / `RoteamentoLinuxVersaoAula.md` — Linux routing labs
+- `01_RoteamentoLinux.md` — Linux router with NAT, DHCP and iptables (classroom script)
+- `02_IntroducaoGNS3.md` — Introduction to GNS3 with Docker and Open vSwitch
+- `03_PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
+- `04_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 
