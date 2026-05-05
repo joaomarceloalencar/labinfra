@@ -79,9 +79,9 @@ Em redes reais, é comum um roteador/firewall servir múltiplas VLANs por uma ú
 
 | Dispositivo | VLAN | Interface | IP | Papel |
 |-------------|------|-----------|----|-------|
-| pfSense | — | WAN (e0) | DHCP (via NAT) | Acesso à Internet |
-| pfSense | 1000 | LAN VLAN 1000 | 10.0.0.1/24 | Gateway Admin |
-| pfSense | 2000 | LAN VLAN 2000 | 10.0.1.1/24 | Gateway Alunos |
+| pfSense | — | WAN (em0) | DHCP (via NAT) | Acesso à Internet |
+| pfSense | 1000 | LAN (em1.1000) | 10.0.0.1/24 | Gateway Administração |
+| pfSense | 2000 | OPT1 (em1.2000) | 10.0.1.1/24 | Gateway Alunos |
 | Admin1 | 1000 | eth0 | 10.0.0.10/24 | Host administração (terminal) |
 | UbuntuDesktop | 1000 | eth0 | 10.0.0.11/24 | Host administração (interface gráfica / Firefox) |
 | Aluno1 | 2000 | eth0 | 10.0.1.10/24 | Host alunos |
@@ -312,6 +312,23 @@ ip route add default via 10.0.0.1
 
 ### UbuntuDesktop
 
+Como o DHCP já está ativo na VLAN 1000, o UbuntuDesktop deve receber IP automaticamente ao iniciar. Basta desativar e reativar a interface de rede:
+
+```bash
+nmcli con down "Wired connection 1" && nmcli con up "Wired connection 1"
+```
+
+Ou pela interface gráfica: desative e reative a conexão cabeada nas **Configurações de Rede**.
+
+Verifique se o IP está na faixa `10.0.0.100–10.0.0.200`:
+
+```bash
+ip addr show eth0
+ip route
+```
+
+> As instruções abaixo são apenas por precaução, caso o IP não seja atribuído automaticamente. Se o DHCP funcionar, não é necessário configurar manualmente.
+
 O UbuntuDesktop usa NetworkManager. Configure o IP pelo terminal ou pela interface gráfica.
 
 **Pelo terminal:**
@@ -378,6 +395,8 @@ ping -c 3 10.0.0.1
 ping -c 3 10.0.1.1
 ```
 
+> **Atenção:** o ping de Aluno1 ao gateway (`10.0.1.1`) **vai falhar**. Por padrão, a interface OPT1 não possui nenhuma regra de firewall no pfSense, bloqueando todo o tráfego originado na VLAN 2000 — incluindo pings ao próprio gateway. Isso será corrigido na Parte 5.
+
 ### Testes — Entre VLANs
 
 ```bash
@@ -385,7 +404,7 @@ ping -c 3 10.0.1.1
 ping -c 3 10.0.1.10
 ```
 
-> **Resultado esperado:** por padrão, o pfSense pode bloquear tráfego entre VLANs (dependendo das regras de firewall). Anote o resultado.
+> **Resultado esperado:** este teste também vai falhar enquanto não houver regras no firewall para OPT1 (Parte 5).
 
 ### Testes — Internet
 
@@ -394,7 +413,7 @@ ping -c 3 10.0.1.10
 ping -c 3 8.8.8.8
 ```
 
-> Se o ping para a Internet não funcionar, será necessário configurar regras de firewall no pfSense (próxima parte).
+> Os hosts da VLAN 2000 não conseguirão acessar a Internet até que as regras de firewall sejam configuradas na Parte 5.
 
 ---
 
@@ -416,41 +435,73 @@ Configurar regras de firewall para permitir tráfego de saída (Internet) e defi
 
 ### Acessar a interface web do pfSense
 
-A partir daqui, as configurações são feitas pela interface web. No **UbuntuDesktop**, abra o **Firefox** e acesse:
+As configurações a seguir são feitas pela interface web. No **UbuntuDesktop**, abra o **Firefox** e acesse:
 
 ```
 http://10.0.0.1
 ```
 
-Credenciais padrão:
+Credenciais:
 * **Usuário:** `admin`
-* **Senha:** `pfsense`
+* **Senha:** `15lab66infra`
 
 ---
 
-### Passo 1 — Permitir tráfego de saída na VLAN 1000 (ADMIN)
+### Passo 1 — Permitir tráfego de saída na VLAN 1000 (LAN)
 
-1. Vá em **Firewall > Rules > ADMIN**
+A interface LAN (VLAN 1000) já possui uma regra padrão que permite todo o tráfego. Caso não esteja presente, adicione:
+
+1. Vá em **Firewall > Rules > LAN**
 2. Clique em **+ Add** (seta para cima — adicionar no topo)
 3. Configure:
    * **Action:** Pass
    * **Protocol:** Any
-   * **Source:** ADMIN net
+   * **Source:** LAN net
    * **Destination:** Any
 4. **Save** e **Apply Changes**
 
 ---
 
-### Passo 2 — Permitir tráfego de saída na VLAN 2000 (ALUNOS)
+### Passo 2 — Adicionar regra para a VLAN 2000 (OPT1)
 
-1. Vá em **Firewall > Rules > ALUNOS**
-2. Clique em **+ Add**
-3. Configure:
+Por padrão, interfaces OPT no pfSense não têm nenhuma regra de firewall — todo o tráfego originado na VLAN 2000 é bloqueado, incluindo pings ao próprio gateway. É necessário adicionar uma regra explicitamente.
+
+1. No **UbuntuDesktop**, acesse `http://10.0.0.1` com Firefox (usuário `admin`, senha `15lab66infra`)
+2. Vá em **Firewall > Rules > OPT1**
+3. Clique em **+ Add** (seta para cima — adicionar no topo)
+4. Configure:
    * **Action:** Pass
+   * **Interface:** OPT1
    * **Protocol:** Any
-   * **Source:** ALUNOS net
+   * **Source:** OPT1 net
    * **Destination:** Any
-4. **Save** e **Apply Changes**
+5. **Save** e **Apply Changes**
+
+Após aplicar a regra, os hosts da VLAN 2000 poderão alcançar o gateway, a Internet e (dependendo das regras futuras) a VLAN 1000.
+
+---
+
+### Passo 3 — Configurar servidores DNS no DHCP
+
+O servidor DHCP foi habilitado pelo console sem incluir servidores DNS. Sem essa configuração, os hosts que receberem IP via DHCP não conseguirão resolver nomes de domínio. Configure os servidores DNS em cada interface pelo pfSense.
+
+#### LAN (VLAN 1000)
+
+1. Vá em **Services > DHCP Server > LAN**
+2. Localize o campo **DNS Servers**
+3. Preencha:
+   * **DNS Server 1:** `8.8.8.8`
+   * **DNS Server 2:** `1.1.1.1`
+4. Clique em **Save**
+
+#### OPT1 (VLAN 2000)
+
+1. Vá em **Services > DHCP Server > OPT1**
+2. Localize o campo **DNS Servers**
+3. Preencha:
+   * **DNS Server 1:** `8.8.8.8`
+   * **DNS Server 2:** `1.1.1.1`
+4. Clique em **Save**
 
 ---
 
@@ -492,7 +543,14 @@ Verificar a distribuição automática de endereços IP nas duas VLANs. O servid
 
 #### Containers ubuntu-net (Admin1, Aluno1, Aluno2)
 
-O container `ubuntu-net` não possui cliente DHCP por padrão. Instale-o primeiro:
+O container `ubuntu-net` não possui cliente DHCP por padrão. Antes de instalá-lo, configure o DNS temporariamente para que o `apt` consiga resolver os repositórios:
+
+```bash
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+```
+
+Instale o cliente DHCP:
 
 ```bash
 apt update && apt install -y isc-dhcp-client
@@ -639,7 +697,7 @@ Aqui o tráfego **não terá** tag VLAN, pois portas access removem a tag antes 
 
 * Regras de firewall no pfSense são avaliadas **de cima para baixo**
 * Uma regra de bloqueio deve vir **antes** de uma regra de permissão geral
-* Configure as regras em **Firewall > Rules > ALUNOS**
+* Configure as regras em **Firewall > Rules > OPT1**
 
 ### Validação
 
