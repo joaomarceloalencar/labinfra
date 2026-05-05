@@ -12,6 +12,7 @@ Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentati
 
 - `IntroducaoGNS3.md` — Introduction to GNS3
 - `PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
+- `TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
 - `RoteamentoLinux.md` / `RoteamentoLinuxVersaoAula.md` — Linux routing labs
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
