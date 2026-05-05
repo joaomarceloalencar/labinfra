@@ -251,9 +251,10 @@ Enter the new LAN IPv4 address: 10.0.0.1
 Enter the new LAN IPv4 subnet bit count: 24
 For a WAN, enter the upstream gateway address.
 For all other interfaces, press <ENTER> for none: [Enter]
+Do you want to enable the DHCP server on LAN? [y|n]: y
+Enter the start address of the client address range: 10.0.0.100
+Enter the end address of the client address range: 10.0.0.200
 ```
-
-Quando perguntar sobre habilitar DHCP: responda **n** (configuraremos na Parte 6).
 
 Quando perguntar sobre HTTP para o webConfigurator: responda **y**.
 
@@ -266,9 +267,10 @@ Enter the new OPT1 IPv4 address: 10.0.1.1
 Enter the new OPT1 IPv4 subnet bit count: 24
 For a WAN, enter the upstream gateway address.
 For all other interfaces, press <ENTER> for none: [Enter]
+Do you want to enable the DHCP server on OPT1? [y|n]: y
+Enter the start address of the client address range: 10.0.1.100
+Enter the end address of the client address range: 10.0.1.200
 ```
-
-Quando perguntar sobre DHCP: responda **n**.
 
 ---
 
@@ -482,35 +484,11 @@ ping -c 3 10.0.1.10
 
 ### Objetivo
 
-Configurar o pfSense para distribuir endereços IP automaticamente em cada VLAN, substituindo a configuração manual.
+Verificar a distribuição automática de endereços IP nas duas VLANs. O servidor DHCP já foi habilitado na Parte 3 (Passo 3) diretamente pelo console, com as faixas `10.0.0.100–10.0.0.200` (VLAN 1000) e `10.0.1.100–10.0.1.200` (VLAN 2000).
 
 ---
 
-### Passo 1 — Ativar DHCP na VLAN 1000 (ADMIN)
-
-1. Vá em **Services > DHCP Server > ADMIN**
-2. Marque **Enable DHCP server on ADMIN interface**
-3. Configure:
-   * **Range:** `10.0.0.100` até `10.0.0.200`
-   * **DNS Servers:** `8.8.8.8` e `1.1.1.1`
-   * **Gateway:** `10.0.0.1`
-4. **Save**
-
----
-
-### Passo 2 — Ativar DHCP na VLAN 2000 (ALUNOS)
-
-1. Vá em **Services > DHCP Server > ALUNOS**
-2. Marque **Enable DHCP server on ALUNOS interface**
-3. Configure:
-   * **Range:** `10.0.1.100` até `10.0.1.200`
-   * **DNS Servers:** `8.8.8.8` e `1.1.1.1`
-   * **Gateway:** `10.0.1.1`
-4. **Save**
-
----
-
-### Passo 3 — Testar nos hosts
+### Passo 1 — Testar nos hosts
 
 #### Containers ubuntu-net (Admin1, Aluno1, Aluno2)
 
