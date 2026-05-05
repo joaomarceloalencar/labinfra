@@ -200,7 +200,6 @@ Responda **y**.
 ```
 Enter the parent interface name for the new VLAN (or nothing if finished): em1
 Enter the VLAN tag (1 to 4094): 1000
-Enter the VLAN description (optional): Administracao
 ```
 
 #### Criar VLAN 2000 (Alunos)
@@ -208,7 +207,6 @@ Enter the VLAN description (optional): Administracao
 ```
 Enter the parent interface name for the new VLAN (or nothing if finished): em1
 Enter the VLAN tag (1 to 4094): 2000
-Enter the VLAN description (optional): Alunos
 ```
 
 #### Finalizar
