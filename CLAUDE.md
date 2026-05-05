@@ -1,9 +1,10 @@
 # CLAUDE.md
 
-This repository has two distinct purposes:
+This repository has three distinct purposes:
 
 1. **Root directory** — Ansible playbooks and scripts for managing physical lab workstations at UFC Quixadá.
 2. **`Tutoriais/`** — Step-by-step networking tutorials applied during classes (written in Portuguese).
+3. **`docker/`** — Dockerfiles for the GNS3 container images used in the tutorials.
 
 ## Tutorials
 
@@ -14,6 +15,33 @@ Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentati
 - `RoteamentoLinux.md` / `RoteamentoLinuxVersaoAula.md` — Linux routing labs
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
+
+## GNS3 Templates
+
+The tutorials use two types of templates in GNS3, all running on `insightcluster09` (accessible via `ssh insightlab@insightcluster09`).
+
+### Docker containers
+
+The `docker/` directory contains the Dockerfiles for the container images built and hosted on `insightcluster09`.
+
+| Directory | Image | Tag | Description |
+|-----------|-------|-----|-------------|
+| `docker/ubuntu-net/` | `insightlab/ubuntu-net` | `1.0` | Ubuntu 22.04 with network tools (iproute2, tcpdump, curl, dig, etc.) |
+| `docker/ovs/` | `insightlab/ovs` | `1.1` | Ubuntu 22.04 with Open vSwitch; `start.sh` initialises the OVS daemon and bridge `br0` at startup |
+
+To rebuild an image on `insightcluster09`:
+
+```bash
+cd /home/insightlab/<image-dir>
+docker build -t insightlab/<name>:<tag> .
+```
+
+### QEMU virtual machines
+
+**pfSense** and **UbuntuDesktop** are QEMU VMs configured directly in GNS3 from their official ISO images — no pre-built appliance file is used. Installation was performed inside GNS3 itself by attaching the ISO as a CD-ROM drive to a new QEMU VM template and following each installer normally.
+
+- **pfSense** — downloaded from https://www.pfsense.org/download/
+- **UbuntuDesktop** — standard Ubuntu Desktop 22.04 ISO; Firefox is included in the default installation
 
 ## Inventory and Configuration
 
