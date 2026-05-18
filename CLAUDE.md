@@ -14,6 +14,7 @@ Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentati
 - `02_IntroducaoGNS3.md` — Introduction to GNS3 with Docker and Open vSwitch
 - `03_PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
 - `04_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
+- `05_SpanningTree.md` — Spanning Tree Protocol (STP/RSTP) with Open vSwitch: broadcast storms, root bridge election, failover
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 
