@@ -15,6 +15,7 @@ Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentati
 - `03_PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
 - `04_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
 - `05_SpanningTree.md` — Spanning Tree Protocol (STP/RSTP) with Open vSwitch: broadcast storms, root bridge election, failover
+- `06_RoteamentoEstatico.md` — Static routing between two sites: pfSense gateways, static routes, traceroute analysis
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 
