@@ -1,4 +1,4 @@
-# Laboratório 05 — Spanning Tree Protocol com Open vSwitch
+# Laboratório 04 — Spanning Tree Protocol com Open vSwitch
 
 ## Objetivo
 
