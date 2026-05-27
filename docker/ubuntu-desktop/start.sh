@@ -12,11 +12,11 @@ Xvfb :0 -screen 0 "${RESOLUTION}" -ac +extension GLX +render &
 sleep 1
 
 # ── Gerenciador de janelas ───────────────────────────────────────────────────
-openbox --display :0 &
+DISPLAY=:0 openbox &
 sleep 1
 
 # ── Terminal inicial ─────────────────────────────────────────────────────────
-xterm -display :0 -geometry 100x30+0+0 &
+DISPLAY=:0 xterm -geometry 100x30+0+0 &
 
 # ── Servidor VNC (porta 5900, sem senha) ─────────────────────────────────────
 x11vnc \
