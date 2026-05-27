@@ -25,11 +25,32 @@ RUN apt-get install -y \
         tint2 \
         # browser
         firefox-esr \
+        # editores de texto
+        vim nano \
         # rede
         iproute2 isc-dhcp-client \
         iputils-ping net-tools dnsutils \
         tcpdump wget curl \
     && rm -rf /var/lib/apt/lists/*
+
+# 3. Hook dhclient: atualiza /etc/resolv.conf com o DNS recebido via DHCP
+RUN mkdir -p /etc/dhcp/dhclient-exit-hooks.d && \
+    cat > /etc/dhcp/dhclient-exit-hooks.d/update-resolv-conf << 'EOF'
+#!/bin/bash
+case "$reason" in
+    BOUND|RENEW|REBIND|REBOOT)
+        [ -n "$new_domain_name_servers" ] || exit 0
+        {
+            for ns in $new_domain_name_servers; do
+                echo "nameserver $ns"
+            done
+            [ -n "$new_domain_name" ] && echo "search $new_domain_name"
+            [ -n "$new_domain_search" ] && echo "search $new_domain_search"
+        } > /etc/resolv.conf
+        ;;
+esac
+EOF
+RUN chmod +x /etc/dhcp/dhclient-exit-hooks.d/update-resolv-conf
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
