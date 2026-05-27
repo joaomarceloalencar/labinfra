@@ -15,6 +15,10 @@ sleep 1
 DISPLAY=:0 openbox &
 sleep 1
 
+# ── Barra de tarefas ─────────────────────────────────────────────────────────
+DISPLAY=:0 tint2 &
+sleep 1
+
 # ── Terminal inicial ─────────────────────────────────────────────────────────
 DISPLAY=:0 xterm -geometry 100x30+0+0 &
 

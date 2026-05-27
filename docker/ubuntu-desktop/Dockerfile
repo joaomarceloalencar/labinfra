@@ -21,6 +21,8 @@ RUN apt-get install -y \
         openbox obconf \
         # terminal
         xterm \
+        # barra de tarefas
+        tint2 \
         # browser
         firefox-esr \
         # rede
