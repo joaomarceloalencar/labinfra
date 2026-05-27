@@ -31,6 +31,7 @@ The `docker/` directory contains the Dockerfiles for the container images built 
 |-----------|-------|-----|-------------|
 | `docker/ubuntu-net/` | `insightlab/ubuntu-net` | `1.0` | Ubuntu 22.04 with network tools (iproute2, tcpdump, curl, dig, etc.) |
 | `docker/ovs/` | `insightlab/ovs` | `1.1` | Ubuntu 22.04 with Open vSwitch; `start.sh` initialises the OVS daemon and bridge `br0` at startup |
+| `docker/ubuntu-desktop/` | `insightlab/ubuntu-desktop` | `1.0` | Ubuntu 22.04 with minimal graphical desktop (Openbox + xterm + Firefox ESR via VNC on port 5900); DHCP on all interfaces at startup; GNS3 console type: `vnc` |
 
 To rebuild an image on `insightcluster09`:
 
