@@ -1,4 +1,4 @@
-# Laboratório 06 — Roteamento Estático entre Sites
+# Laboratório 05 — Roteamento Estático entre Sites
 
 ## Objetivo
 
