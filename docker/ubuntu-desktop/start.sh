@@ -4,7 +4,7 @@ set -e
 # ── DHCP em todas as interfaces (exceto lo) ──────────────────────────────────
 for iface in $(ls /sys/class/net/ | grep -v lo); do
     echo "[net] Solicitando IP via DHCP em $iface..."
-    dhclient "$iface" 2>/dev/null || true
+    dhclient -timeout 10 "$iface" 2>/dev/null || true
 done
 
 # ── Display virtual ──────────────────────────────────────────────────────────
