@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y \
 
 # 2. Ambiente gráfico mínimo + ferramentas de rede
 RUN apt-get install -y \
-        # display virtual + VNC
-        xvfb x11vnc \
+        # VNC integrado (Xvnc = servidor X + VNC num único processo)
+        tigervnc-standalone-server \
         # gerenciador de janelas leve
         openbox obconf \
         # terminal

@@ -7,9 +7,18 @@ for iface in $(ls /sys/class/net/ | grep -v lo); do
     dhclient -timeout 10 "$iface" 2>/dev/null || true
 done
 
-# ── Display virtual ──────────────────────────────────────────────────────────
-Xvfb :0 -screen 0 "${RESOLUTION}" -ac +extension GLX +render &
-sleep 1
+# ── Extrair geometria e profundidade de cor de RESOLUTION (ex: 1280x768x24) ──
+GEOM="${RESOLUTION%x*}"    # "1280x768"
+DEPTH="${RESOLUTION##*x}"  # "24"
+
+# ── Xvnc: servidor X + VNC num único processo (sem race condition) ────────────
+Xvnc :0 \
+    -geometry "$GEOM" \
+    -depth "$DEPTH" \
+    -rfbport 5900 \
+    -SecurityTypes None \
+    -localhost no &
+sleep 2
 
 # ── Gerenciador de janelas ───────────────────────────────────────────────────
 DISPLAY=:0 openbox &
@@ -21,15 +30,6 @@ sleep 1
 
 # ── Terminal inicial ─────────────────────────────────────────────────────────
 DISPLAY=:0 xterm -geometry 100x30+0+0 &
-
-# ── Servidor VNC (porta 5900, sem senha) ─────────────────────────────────────
-x11vnc \
-    -display :0 \
-    -forever \
-    -nopw \
-    -rfbport 5900 \
-    -quiet \
-    -bg
 
 # Mantém o container vivo
 tail -f /dev/null
