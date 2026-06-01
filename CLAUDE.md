@@ -8,14 +8,16 @@ This repository has three distinct purposes:
 
 ## Tutorials
 
-Markdown files in `Tutoriais/` are classroom lab guides, not Ansible documentation:
+Markdown files in `Tutoriais/` are classroom activity guides, not Ansible documentation:
 
-- `01_RoteamentoLinux.md` — Linux router with NAT, DHCP and iptables (classroom script)
-- `02_IntroducaoGNS3.md` — Introduction to GNS3 with Docker and Open vSwitch
-- `03_PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
-- `04_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
-- `05_SpanningTree.md` — Spanning Tree Protocol (STP/RSTP) with Open vSwitch: broadcast storms, root bridge election, failover
-- `06_RoteamentoEstatico.md` — Static routing between two sites: pfSense gateways, static routes, traceroute analysis
+- `01_CabeamentoRJ45.md` — Structured cabling with RJ45 connectors (hands-on in classroom)
+- `02_RoteamentoLinux.md` — Linux router with NAT, DHCP and iptables
+- `03_pfSenseNoVirtualBox.md` — pfSense installation and configuration in VirtualBox
+- `04_05_IntroducaoGNS3.md` — Introduction to GNS3 with Docker and Open vSwitch (two sessions)
+- `06_PfSenseVLANs.md` — pfSense with VLANs on Open vSwitch
+- `07_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
+- `08_SpanningTree.md` — Spanning Tree Protocol (STP/RSTP) with Open vSwitch: broadcast storms, root bridge election, failover
+- `09_RoteamentoEstatico.md` — Static routing between two sites: pfSense gateways, static routes, traceroute analysis
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 

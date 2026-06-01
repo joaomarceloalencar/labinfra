@@ -1,4 +1,4 @@
-# Laboratório 04 — Spanning Tree Protocol com Open vSwitch
+# 🧪 Atividade 08 — Laboratório de Infraestrutura de Redes - Spanning Tree Protocol com OpenvSwitch
 
 ## Objetivo
 

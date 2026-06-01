@@ -1,4 +1,4 @@
-# Laboratório 03 — VLANs em múltiplos switches com trunk inter-switch
+# 🧪 Atividade 07 — Laboratório de Infraestrutura de Redes - VLANs em múltiplos switches com trunk inter-switch
 
 ## Objetivo
 

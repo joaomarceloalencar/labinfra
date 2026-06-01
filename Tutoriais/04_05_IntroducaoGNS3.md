@@ -1,4 +1,4 @@
-# 🧪 Laboratório 01 — Introdução ao GNS3 com Docker e Open vSwitch
+# 🧪 Atividades 04 e 05 — Laboratório de Infraestrutura de Redes - Introdução ao GNS3 com Docker e Open vSwitch
 
 ## 🎯 Objetivo
 

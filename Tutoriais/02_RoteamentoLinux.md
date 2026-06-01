@@ -1,4 +1,4 @@
-# 🧪 Laboratório de Infraestrutura de Redes
+# 🧪 Atividade 02 — Laboratório de Infraestrutura de Redes - Roteador Linux no Virtual Box
 
 ## Roteiro de Aula — Roteador Linux com NAT, DHCP e Firewall
 

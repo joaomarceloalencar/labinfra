@@ -1,4 +1,4 @@
-# Laboratório 02 — pfSense com VLANs no Open vSwitch
+# 🧪 Atividade 06 — Laboratório de Infraestrutura de Redes - pfSense com VLANs
 
 ## Objetivo
 
