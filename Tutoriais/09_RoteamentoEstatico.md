@@ -25,7 +25,7 @@ Aproximadamente **3h**
 * Ter concluído o Laboratório 03 (pfSense básico com VLANs)
 * Templates disponíveis no GNS3:
   * Container: `ubuntu-net` (insightlab/ubuntu-net:1.0)
-  * Máquina virtual: `UbuntuDesktop` (QEMU — com interface gráfica e Firefox)
+  * Container: `ubuntu-desktop` (insightlab/ubuntu-desktop:1.0 — desktop gráfico com Firefox, console VNC)
   * Switch: Open vSwitch (insightlab/ovs:1.1)
   * Roteador/Firewall: pfSense (QEMU)
   * Cloud: NAT
@@ -121,7 +121,7 @@ O retorno percorre o caminho inverso, usando a rota configurada no pfSense-B.
    * 2 **pfSense** (QEMU): pfSense-A e pfSense-B
    * 2 **Open vSwitch**: OVS-A e OVS-B
    * 2 containers **ubuntu-net**: Admin-A e Admin-B
-   * 2 **UbuntuDesktop** (QEMU): UbuntuDesktop-A e UbuntuDesktop-B
+   * 2 containers **ubuntu-desktop**: UbuntuDesktop-A e UbuntuDesktop-B
 
 2. Conecte:
    * **NAT-A** → **pfSense-A** `e0` (WAN)
@@ -253,10 +253,16 @@ ip route add default via 10.0.0.1
 
 ### UbuntuDesktop-A
 
-Como o DHCP está ativo no Site A, reconecte a interface:
+O container executa `dhclient` automaticamente ao iniciar. Abra o console VNC no GNS3 e, no terminal (xterm), verifique o IP obtido:
 
 ```bash
-nmcli con down "Wired connection 1" && nmcli con up "Wired connection 1"
+ip addr show eth0
+```
+
+Se necessário, renove o lease manualmente:
+
+```bash
+dhclient eth0
 ip addr show eth0
 ```
 
@@ -272,8 +278,16 @@ ip route add default via 10.1.0.1
 
 ### UbuntuDesktop-B
 
+Abra o console VNC no GNS3 e, no terminal, verifique o IP:
+
 ```bash
-nmcli con down "Wired connection 1" && nmcli con up "Wired connection 1"
+ip addr show eth0
+```
+
+Se necessário:
+
+```bash
+dhclient eth0
 ip addr show eth0
 ```
 
@@ -327,6 +341,11 @@ ping -c 3 10.1.0.10
 ## Parte 6 — Configurar rotas estáticas
 
 Acesse a interface web de cada pfSense via Firefox no UbuntuDesktop do respectivo site (usuário: `admin`, senha: `15lab66infra`).
+
+> **Abrindo o Firefox:** no console VNC do UbuntuDesktop, clique com o botão direito no desktop → **Applications → Web Browser**, ou digite no terminal:
+> ```bash
+> firefox-esr &
+> ```
 
 No pfSense, antes de criar uma rota estática é necessário definir o **gateway** (próximo salto) como um objeto separado.
 
