@@ -148,23 +148,19 @@ Comandos de verificação:
 ### Diagrama
 
 ```
-                   [ NAT do GNS3 ]
-                         |
-                       ether1
-                       [ R1 ]
-          ether2                  ether3
-    10.0.12.1/30            10.0.13.1/30
-          |                        |
-    10.0.12.2/30            10.0.13.2/30
-       ether1                   ether1
-       [ R2 ] ─── 10.0.23.0/30 ─── [ R3 ]
-       ether2                   ether2
-   10.0.23.1/30              10.0.23.2/30
-
-Cada roteador tem uma LAN própria:
-  R1 ether4 ─► [OVS-R1] ─► PC-LAN1   (192.168.1.0/24)
-  R2 ether3 ─► [OVS-R2] ─► PC-LAN2   (192.168.2.0/24)
-  R3 ether3 ─► [OVS-R3] ─► PC-LAN3   (192.168.3.0/24)
+              [ NAT do GNS3 ]
+                     │
+                   [ R1 ]──────────[OVS-R1]──PC-LAN1
+                  /       \                 192.168.1.0/24
+       10.0.12.0/30       10.0.13.0/30
+              /                 \
+           [ R2 ]───────────[ R3 ]
+                  10.0.23.0/30
+             │                    │
+         [OVS-R2]             [OVS-R3]
+             │                    │
+         PC-LAN2              PC-LAN3
+      192.168.2.0/24       192.168.3.0/24
 ```
 
 A topologia em **anel** (R1–R2–R3–R1) é essencial para este laboratório: ela garante que sempre existe um caminho alternativo para qualquer par de roteadores quando um enlace falha.
