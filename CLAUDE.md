@@ -18,6 +18,8 @@ Markdown files in `Tutoriais/` are classroom activity guides, not Ansible docume
 - `07_TrunkInterSwitch.md` — VLANs across two OVS switches with inter-switch trunk and pfSense
 - `08_SpanningTree.md` — Spanning Tree Protocol (STP/RSTP) with Open vSwitch: broadcast storms, root bridge election, failover
 - `09_RoteamentoEstatico.md` — Static routing between two sites: pfSense gateways, static routes, traceroute analysis
+- `10_MikroTikVLANs.md` — MikroTik CHR: flat network with DHCP/NAT, then VLANs with 802.1Q trunk to OVS, inter-VLAN firewall
+- `11_OSPF.md` — Dynamic routing with OSPF: ring topology with three MikroTik routers, link failover, cost manipulation, iPerf measurement
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 
