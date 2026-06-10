@@ -708,7 +708,7 @@ Para bloquear Alunos de acessar a rede de Gestão, usamos `chain=forward`:
 ```
 /ip firewall filter add \
     chain=forward \
-    connection-state = established,related \
+    connection-state=established,related \
     action=accept
 
 /ip firewall filter add \
