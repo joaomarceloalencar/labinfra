@@ -20,6 +20,7 @@ Markdown files in `Tutoriais/` are classroom activity guides, not Ansible docume
 - `09_RoteamentoEstatico.md` — Static routing between two sites: pfSense gateways, static routes, traceroute analysis
 - `10_MikroTikVLANs.md` — MikroTik CHR: flat network with DHCP/NAT, then VLANs with 802.1Q trunk to OVS, inter-VLAN firewall
 - `11_OSPF.md` — Dynamic routing with OSPF: ring topology with three MikroTik routers, link failover, cost manipulation, iPerf measurement
+- `12_AvaliacaoFinal.md` — Final evaluation (2.0 bonus points): independent activity connecting HQ (MikroTik + VLANs + NAT) to branch via OSPF with inter-VLAN firewall; includes professor grading guide
 
 When editing tutorials, preserve the step-by-step instructional style intended for students.
 
