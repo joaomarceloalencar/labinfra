@@ -136,27 +136,27 @@ Entregue capturas de tela comprovando cada requisito:
 
 ---
 
-## Rubrica (2,0 pontos)
+## Rubrica (5,0 pontos)
 
 | Item | Descrição | Pontos |
 |------|-----------|--------|
-| R1 | Topologia montada corretamente no GNS3 | 0,2 |
-| R2 | VLANs na Matriz com DHCP funcionando (0,1 por VLAN) | 0,2 |
-| R3 | DHCP na Filial funcionando | 0,1 |
-| R4 | NAT e acesso à Internet de PC-TI | 0,2 |
-| R5 | Conectividade no enlace WAN (10.0.0.0/30) | 0,1 |
-| R6 | Adjacência OSPF Full entre os roteadores | 0,2 |
-| R7 | Rotas OSPF corretas em ambos os roteadores (incluindo default) | 0,2 |
-| R8 | PC-Filial alcança ambas as VLANs da Matriz | 0,2 |
-| R9 | Regra de firewall correta (Gestão bloqueada, TI livre) | 0,3 |
-| R10 | iPerf executado com resultado registrado | 0,1 |
-| **Total** | | **2,0** |
+| R1 | Topologia montada corretamente no GNS3 | 0,5 |
+| R2 | VLANs na Matriz com DHCP funcionando (0,25 por VLAN + OVS trunk) | 0,75 |
+| R3 | DHCP na Filial funcionando | 0,25 |
+| R4 | NAT e acesso à Internet de PC-TI | 0,5 |
+| R5 | Conectividade no enlace WAN (10.0.0.0/30) | 0,25 |
+| R6 | Adjacência OSPF Full entre os roteadores | 0,5 |
+| R7 | Rotas OSPF corretas em ambos os roteadores (incluindo default) | 0,5 |
+| R8 | PC-Filial alcança ambas as VLANs da Matriz e a Internet | 0,5 |
+| R9 | Regra de firewall correta (Gestão bloqueada, TI livre) | 0,75 |
+| R10 | iPerf executado com resultado registrado | 0,5 |
+| **Total** | | **5,0** |
 
 ---
 
 ## Verificação por item
 
-### R1 — Topologia (0,2 pts)
+### R1 — Topologia (0,5 pts)
 
 Verificação visual no GNS3. Checar:
 - 2 roteadores MikroTik, 2 switches OVS, 3 hosts ubuntu-net, 1 NAT cloud
@@ -166,7 +166,7 @@ Verificação visual no GNS3. Checar:
 
 ---
 
-### R2 — VLANs na Matriz com DHCP (0,2 pts)
+### R2 — VLANs na Matriz com DHCP (0,75 pts)
 
 No console de **GW-Matriz**:
 
@@ -197,7 +197,7 @@ Esperado:
 
 ---
 
-### R3 — DHCP na Filial (0,1 pts)
+### R3 — DHCP na Filial (0,25 pts)
 
 No console de **GW-Filial**:
 
@@ -216,7 +216,7 @@ Esperado: IP na faixa `192.168.100.100–200`, gateway `192.168.100.1`.
 
 ---
 
-### R4 — NAT e Internet (0,2 pts)
+### R4 — NAT e Internet (0,5 pts)
 
 No console de **GW-Matriz**:
 
@@ -241,7 +241,7 @@ Deve responder.
 
 ---
 
-### R5 — Enlace WAN (0,1 pts)
+### R5 — Enlace WAN (0,25 pts)
 
 No console de **GW-Matriz**:
 
@@ -261,7 +261,7 @@ Ambos devem responder. Se não responder, o OSPF não formará adjacência.
 
 ---
 
-### R6 — Adjacência OSPF Full (0,2 pts)
+### R6 — Adjacência OSPF Full (0,5 pts)
 
 No console de **GW-Matriz**:
 
@@ -287,7 +287,7 @@ Esperado: uma entrada com `ADDRESS=10.0.0.1`, `STATE=Full/PtP`.
 
 ---
 
-### R7 — Rotas OSPF corretas (0,2 pts)
+### R7 — Rotas OSPF corretas (0,5 pts)
 
 No console de **GW-Matriz**:
 
@@ -318,7 +318,7 @@ Para a rota padrão aparecer, GW-Matriz precisa ter configurado:
 
 ---
 
-### R8 — PC-Filial alcança VLANs da Matriz (0,2 pts)
+### R8 — PC-Filial alcança VLANs da Matriz e a Internet (0,5 pts)
 
 De **PC-Filial**:
 
@@ -331,9 +331,18 @@ ping -c 3 <IP de PC-Gestão>
 
 Todos devem responder (antes da regra de firewall ser aplicada — ou verificar que PC-TI ainda responde depois).
 
+Verificar também o acesso à Internet via Matriz:
+
+```bash
+ping -c 3 8.8.8.8
+traceroute 8.8.8.8
+```
+
+O traceroute deve mostrar `10.0.0.1` (GW-Matriz) como primeiro salto, confirmando que a rota padrão OSPF está sendo usada.
+
 ---
 
-### R9 — Regra de firewall (0,3 pts)
+### R9 — Regra de firewall (0,75 pts)
 
 No console de **GW-Matriz**:
 
@@ -373,7 +382,7 @@ Deve **funcionar**.
 
 ---
 
-### R10 — iPerf (0,1 pts)
+### R10 — iPerf (0,5 pts)
 
 Em **PC-Filial** (servidor):
 
